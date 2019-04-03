@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="card white darken-1">
+                <div class="card-content white-black">
+                    <span class="card-title teal-text"><b>TRAINS</b></span>
+                    <hr>
+                    <div class="row">
+                        <div class="col s12">
+                            <b>Current Train Schedule</b>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s2">
+                            <p> Train Name</p>
+                        </div>
+                        <div class="col s2">
+                            <p> Destination</p>
+                        </div>
+                        <div class="col s2">
+                            <p> Frequency (min)</p>
+                        </div>
+                        <div class="col s2">
+                            <p> Next Arrival</p>
+                        </div>
+                        <div class="col s4">
+                            <p> Minutes Away</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div id="disp"></div>
+                    <div class="row" id="added">
+
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col s12">
+                            <b>Add Train</b>
+                            <hr>
+                        </div>
+                        <form>
+                            <div class="col s4">
+                                <p>
+                                    <label for="name">Train Name</label>
+                                    <input type="text" name="name" id="name">
+                                </p>
+                                <p>
+                                    <label for="dest">Destination</label>
+                                    <input type="text" name="dest" id="dest">
+                                </p>
+                                <p>
+                                    <label for="time">First Train Time (HH:mm military time)</label>
+                                    <input type="time" name="time" id="time">
+                                </p>
+                                <p>
+                                    <label for="freq">Frequency (min)</label>
+                                    <input type="text" name="freq" id="freq">
+                                </p>
+                                <button id="submit">Submit</button>
+                        </form>
+                    </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
+    <script>
+
+
+var local = new Date();
+                var now = local.getHours()*60 + local.getMinutes()
+                console.log(now)
+
+
+
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyBWLwQVZ7u9HPl-EIAJCmwOq5SCbABSQfs",
+            authDomain: "newproj-51804.firebaseapp.com",
+            databaseURL: "https://newproj-51804.firebaseio.com",
+            projectId: "newproj-51804",
+            storageBucket: "newproj-51804.appspot.com",
+            messagingSenderId: "380685415876"
+        };
+        firebase.initializeApp(config);
+
+        let db = firebase.firestore()
+
+        document.querySelector('#submit').addEventListener('click',
+            e => {
+                e.preventDefault()
+
+                let name = document.querySelector('#name').value
+                let dest = document.querySelector('#dest').value
+                let time = document.querySelector('#time').value
+                let freq = document.querySelector('#freq').value
+
+
+                let id = db.collection('users').doc().id
+
+                db.collection('users').doc(id).set({
+                    name: document.querySelector('#name').value,
+                    dest: document.querySelector('#dest').value,
+                    time: document.querySelector('#time').value,
+                    freq: document.querySelector('#freq').value,
+
+                    // birthday: moment(`${birthday} ${time}`, 'YYYY-MM-DD HH:mm').valueOf(),
+                })
+
+                document.querySelector('#name').value = ''
+                document.querySelector('#dest').value = ''
+                document.querySelector('#time').value = ''
+                document.querySelector('#freq').value = ''
+
+            })
+
+
+
+        db.collection('users').onSnapshot(({ docs }) => {
+            document.querySelector('#disp').innerHTML = ''
+            docs.forEach(doc => {
+                let { name, dest, time, freq } = doc.data()
+                let userElem = document.createElement('div')
+                var min = time.split(':')
+var nextArriv = parseInt(+min[0])*60 + parseInt(+min[1])
+var minAway = nextArriv - now
+
+
+console.log(nextArriv)
+                userElem.innerHTML = `
+                <div class="col s2">
+                            <p>${name}</p>
+                        </div>
+                        <div class="col s2">
+                            <p>${dest}</p>
+                        </div>
+                        <div class="col s2">
+                            <p>${freq}</p>
+                        </div>
+                        <div class="col s2">
+                        <p>${time}</p>
+                        </div>
+                        <div class="col s4">
+                        <p>${minAway}</p>
+                        </div>
+                    `
+                document.querySelector('#disp').append(userElem)
+            })
+        })
+
+
+    </script>
+</body>
+
+</html>
